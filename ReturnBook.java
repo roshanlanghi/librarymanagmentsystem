@@ -44,20 +44,38 @@ public class ReturnBook extends JFrame implements ActionListener {
 
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == returnButton) {
-            try {
-                Connection con = DatabaseConnection.getConnection();
-                PreparedStatement pst = con.prepareStatement("UPDATE issued_books SET return_date = CURDATE() WHERE book_id = ? AND student_id = ?");
-                pst.setString(1, bookIdField.getText());
-                pst.setString(2, studentIdField.getText());
+            String bookId = bookIdField.getText().trim();
+            String studentId = studentIdField.getText().trim();
+
+            if (bookId.isEmpty() || studentId.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill all fields.");
+                return;
+            }
+
+            try (Connection con = DatabaseConnection.getConnection()) {
+                PreparedStatement pst = con.prepareStatement(
+                        "UPDATE issued_books SET return_date = CURDATE() " +
+                                "WHERE book_id = ? AND student_id = ? AND return_date IS NULL"
+                );
+                pst.setString(1, bookId);
+                pst.setString(2, studentId);
+
                 int updated = pst.executeUpdate();
                 if (updated > 0) {
+                    PreparedStatement updateBook = con.prepareStatement(
+                            "UPDATE books SET is_issued = false WHERE book_id = ?"
+                    );
+                    updateBook.setString(1, bookId);
+                    updateBook.executeUpdate();
+
                     JOptionPane.showMessageDialog(this, "Book Returned Successfully!");
+                    dispose();
                 } else {
-                    JOptionPane.showMessageDialog(this, "No such issued book found!");
+                    JOptionPane.showMessageDialog(this, "Book already returned or not found!");
                 }
-                dispose();
             } catch (Exception ex) {
                 ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error returning book.");
             }
         } else if (e.getSource() == backButton) {
             dispose();

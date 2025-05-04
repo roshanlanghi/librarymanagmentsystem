@@ -1,14 +1,22 @@
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class DatabaseConnection {
-    static Connection con;
+    private static Connection con;
 
     public static Connection getConnection() {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/librarydb", "root", "Roshan@1234");
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (con == null) {
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver"); // Load MySQL driver
+                con = DriverManager.getConnection(
+                        "jdbc:mysql://localhost:3306/librarydb?useSSL=false&serverTimezone=UTC",
+                        "root",
+                        "Roshan@1234"
+                );
+            } catch (ClassNotFoundException | SQLException e) {
+                e.printStackTrace();
+            }
         }
         return con;
     }

@@ -8,100 +8,107 @@ public class Login extends JFrame implements ActionListener {
     JPasswordField passwordField;
     JButton loginButton, signupButton;
 
-    public Login() {
-        setTitle("Library Management System - Login");
+    Login() {
+        setTitle("Library Login");
+        setSize(500, 350);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setExtendedState(JFrame.MAXIMIZED_BOTH); // full screen
-        setLayout(new BorderLayout());
 
-        // Main panel centered in the frame
-        JPanel centerPanel = new JPanel(new GridBagLayout());
-        centerPanel.setBackground(new Color(46, 86, 189)); // light background
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 20, 10, 20);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        Font font = new Font("Segoe UI", Font.PLAIN, 18);
+        // Load and scale the background image to fit the frame
+        ImageIcon originalIcon = new ImageIcon("C:\\Users\\LOQ\\OneDrive\\Desktop\\JAVACODESPRA\\librarymanagementsystem\\src\\login.jpg");
+        Image scaledImage = originalIcon.getImage().getScaledInstance(500, 350, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(scaledImage);
+        JLabel background = new JLabel(scaledIcon);
+        background.setBounds(0, 0, 500, 350);
+        setContentPane(background);
+        background.setLayout(null);
 
-        JLabel title = new JLabel("📚 Library Management System", JLabel.CENTER);
-        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        title.setForeground(new Color(216, 228, 45)); // dark blue
-        gbc.gridwidth = 2;
-        gbc.gridx = 0; gbc.gridy = 0;
-        centerPanel.add(title, gbc);
+        // Transparent panel to hold components and center them
+        JPanel panel = new JPanel();
+        panel.setLayout(null);
+        panel.setBounds(50, 50, 400, 230);
+        panel.setOpaque(false);
+        background.add(panel);
 
-        gbc.gridwidth = 1;
+        JLabel title = new JLabel("Library Login");
+        title.setFont(new Font("Arial", Font.BOLD, 24));
+        title.setForeground(Color.WHITE);
+        title.setBounds(110, 10, 200, 30);
+        panel.add(title);
 
         JLabel userLabel = new JLabel("Username:");
-        userLabel.setFont(font);
-        gbc.gridx = 0; gbc.gridy = 1;
-        centerPanel.add(userLabel, gbc);
+        userLabel.setBounds(30, 60, 100, 25);
+        userLabel.setForeground(Color.WHITE);
+        panel.add(userLabel);
 
-        usernameField = new JTextField(20);
-        usernameField.setFont(font);
-        gbc.gridx = 1;
-        centerPanel.add(usernameField, gbc);
+        usernameField = new JTextField();
+        usernameField.setBounds(130, 60, 200, 25);
+        panel.add(usernameField);
 
         JLabel passLabel = new JLabel("Password:");
-        passLabel.setFont(font);
-        gbc.gridx = 0; gbc.gridy = 2;
-        centerPanel.add(passLabel, gbc);
+        passLabel.setBounds(30, 100, 100, 25);
+        passLabel.setForeground(Color.WHITE);
+        panel.add(passLabel);
 
-        passwordField = new JPasswordField(20);
-        passwordField.setFont(font);
-        gbc.gridx = 1;
-        centerPanel.add(passwordField, gbc);
+        passwordField = new JPasswordField();
+        passwordField.setBounds(130, 100, 200, 25);
+        panel.add(passwordField);
 
-        loginButton = new JButton("🔐 Login");
-        loginButton.setFont(font);
-        loginButton.setBackground(new Color(16, 60, 239));
-        loginButton.setForeground(Color.blue);
-        gbc.gridx = 0; gbc.gridy = 3;
-        centerPanel.add(loginButton, gbc);
-
-        signupButton = new JButton("📝 Signup");
-        signupButton.setFont(font);
-        signupButton.setBackground(new Color(0, 51, 255));
-        signupButton.setForeground(Color.blue);
-        gbc.gridx = 1;
-        centerPanel.add(signupButton, gbc);
-
+        loginButton = new JButton("Login");
+        loginButton.setBounds(80, 150, 100, 30);
+        loginButton.setBackground(new Color(0, 123, 255));
+        loginButton.setForeground(Color.WHITE);
         loginButton.addActionListener(this);
-        signupButton.addActionListener(this);
+        panel.add(loginButton);
 
-        add(centerPanel, BorderLayout.CENTER);
+        signupButton = new JButton("Signup");
+        signupButton.setBounds(200, 150, 100, 30);
+        signupButton.setBackground(new Color(0, 123, 255));
+        signupButton.setForeground(Color.WHITE);
+        signupButton.addActionListener(this);
+        panel.add(signupButton);
+
+        setResizable(false);
         setVisible(true);
     }
+    public void actionPerformed(ActionEvent ae) {
+        if (ae.getSource() == loginButton) {
+            String username = usernameField.getText().trim();
+            String password = String.valueOf(passwordField.getPassword()).trim();
 
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == loginButton) {
+            // Check for empty fields
+            if (username.isEmpty() || password.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter both username and password");
+                return; // Stop here if input is invalid
+            }
+
             try {
                 Connection con = DatabaseConnection.getConnection();
-                PreparedStatement pst = con.prepareStatement("SELECT * FROM users WHERE username=? AND password=?");
-                pst.setString(1, usernameField.getText());
-                pst.setString(2, String.valueOf(passwordField.getPassword()));
+                String query = "SELECT * FROM users WHERE username=? AND password=?";
+                PreparedStatement pst = con.prepareStatement(query);
+                pst.setString(1, username);
+                pst.setString(2, password);
                 ResultSet rs = pst.executeQuery();
+
                 if (rs.next()) {
-                    JOptionPane.showMessageDialog(this, "✅ Login Successful!");
+                    JOptionPane.showMessageDialog(this, "Login Successful");
+                    setVisible(false);
                     new Dashboard();
-                    dispose();
                 } else {
-                    JOptionPane.showMessageDialog(this, "❌ Invalid Credentials!", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Invalid credentials");
                 }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "⚠️ Error connecting to database.", "Error", JOptionPane.ERROR_MESSAGE);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Database Error");
             }
-        } else if (e.getSource() == signupButton) {
-            new Signup();
+        } else if (ae.getSource() == signupButton) {
             dispose();
+            new Signup();
         }
     }
 
     public static void main(String[] args) {
-        // Use system look and feel for better aesthetics
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ignored) {}
         new Login();
     }
 }

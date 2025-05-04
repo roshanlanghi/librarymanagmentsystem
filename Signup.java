@@ -9,37 +9,58 @@ public class Signup extends JFrame implements ActionListener {
     JButton signupButton, backButton;
 
     Signup() {
+        // Frame settings
         setTitle("Signup");
-        setLayout(null);
+        setSize(500, 350);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 250);
         setLocationRelativeTo(null);
+        setLayout(null);
 
+        // Background image
+        ImageIcon originalIcon = new ImageIcon("C:\\Users\\LOQ\\OneDrive\\Desktop\\JAVACODESPRA\\librarymanagementsystem\\src\\login.jpg");
+        Image scaledImage = originalIcon.getImage().getScaledInstance(500, 350, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(scaledImage);
+        JLabel background = new JLabel(scaledIcon);
+        background.setBounds(0, 0, 500, 350);
+        setContentPane(background);
+        background.setLayout(null);
+
+        // Transparent panel
+        JPanel panel = new JPanel();
+        panel.setLayout(null);
+        panel.setBounds(50, 50, 400, 230);
+        panel.setOpaque(false);
+        background.add(panel);
+
+        // Username label & field
         JLabel userLabel = new JLabel("Username:");
-        userLabel.setBounds(50, 50, 100, 30);
-        add(userLabel);
+        userLabel.setBounds(50, 30, 100, 30);
+        panel.add(userLabel);
 
         usernameField = new JTextField();
-        usernameField.setBounds(150, 50, 180, 30);
-        add(usernameField);
+        usernameField.setBounds(150, 30, 180, 30);
+        panel.add(usernameField);
 
+        // Password label & field
         JLabel passLabel = new JLabel("Password:");
-        passLabel.setBounds(50, 90, 100, 30);
-        add(passLabel);
+        passLabel.setBounds(50, 80, 100, 30);
+        panel.add(passLabel);
 
         passwordField = new JPasswordField();
-        passwordField.setBounds(150, 90, 180, 30);
-        add(passwordField);
+        passwordField.setBounds(150, 80, 180, 30);
+        panel.add(passwordField);
 
+        // Signup button
         signupButton = new JButton("Signup");
         signupButton.setBounds(50, 140, 100, 30);
         signupButton.addActionListener(this);
-        add(signupButton);
+        panel.add(signupButton);
 
+        // Back button
         backButton = new JButton("Back");
         backButton.setBounds(230, 140, 100, 30);
         backButton.addActionListener(this);
-        add(backButton);
+        panel.add(backButton);
 
         setVisible(true);
     }
@@ -53,14 +74,19 @@ public class Signup extends JFrame implements ActionListener {
                 pst.setString(2, String.valueOf(passwordField.getPassword()));
                 pst.executeUpdate();
                 JOptionPane.showMessageDialog(this, "Signup Successful!");
-                new Login();
+                new Login(); // Make sure Login class exists
                 dispose();
             } catch (Exception ex) {
                 ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Signup Failed!");
             }
         } else if (e.getSource() == backButton) {
-            new Login();
+            new Login(); // Make sure Login class exists
             dispose();
         }
+    }
+
+    public static void main(String[] args) {
+        new Signup();
     }
 }

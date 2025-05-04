@@ -3,8 +3,16 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class Dashboard extends JFrame implements ActionListener {
-    JButton newBookButton, statisticsButton, newStudentButton, issueBookButton, returnBookButton, aboutButton;
+    JButton createButton, transactionButton, viewButton;
+    JButton newBookSubButton, newStudentSubButton;
+    JButton issueBookSubButton, returnBookSubButton;
+    JButton statisticsSubButton, bookRecordsSubButton;
+
+    JPanel createPanel, transactionPanel, viewPanel;
     Image backgroundImage;
+
+    private Statistics statisticsFrame = null; // Track the Statistics window
+    private BookRecords bookRecordsFrame = null; // Track the Book Records window
 
     Dashboard() {
         setTitle("Library Management Dashboard");
@@ -26,8 +34,8 @@ public class Dashboard extends JFrame implements ActionListener {
         setContentPane(backgroundPanel);
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(20, 20, 20, 20);
-        gbc.gridwidth = 2;
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Title Label
         JLabel heading = new JLabel("Welcome to Library Management System", SwingConstants.CENTER);
@@ -38,72 +46,122 @@ public class Dashboard extends JFrame implements ActionListener {
         heading.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.PAGE_START;
+        gbc.gridwidth = 3;
         backgroundPanel.add(heading, gbc);
 
-        // Reset for buttons
         gbc.gridwidth = 1;
-        gbc.anchor = GridBagConstraints.CENTER;
 
-        // First row of buttons
+        // Create main buttons and their panels
+        createButton = createMainButton("Create");
+        transactionButton = createMainButton("Transaction");
+        viewButton = createMainButton("View");
+
+        // Create sub-panels (initially hidden)
+        createPanel = createSubPanel();
+        newBookSubButton = createSubButton("New Book");
+        newStudentSubButton = createSubButton("New Student");
+        createPanel.add(newBookSubButton);
+        createPanel.add(newStudentSubButton);
+        createPanel.setVisible(false);
+
+        transactionPanel = createSubPanel();
+        issueBookSubButton = createSubButton("Issue Book");
+        returnBookSubButton = createSubButton("Return Book");
+        transactionPanel.add(issueBookSubButton);
+        transactionPanel.add(returnBookSubButton);
+        transactionPanel.setVisible(false);
+
+        viewPanel = createSubPanel();
+        statisticsSubButton = createSubButton("Statistics");
+        bookRecordsSubButton = createSubButton("Book Records");
+        viewPanel.add(statisticsSubButton);
+        viewPanel.add(bookRecordsSubButton);
+        viewPanel.setVisible(false);
+
+        // Add main buttons and sub-panels to layout
         gbc.gridy = 1;
-
         gbc.gridx = 0;
-        newBookButton = createButton("New Book");
-        backgroundPanel.add(newBookButton, gbc);
+        backgroundPanel.add(createButton, gbc);
 
         gbc.gridx = 1;
-        statisticsButton = createButton("Statistics");
-        backgroundPanel.add(statisticsButton, gbc);
+        backgroundPanel.add(transactionButton, gbc);
 
-        // Second row of buttons
+        gbc.gridx = 2;
+        backgroundPanel.add(viewButton, gbc);
+
         gbc.gridy = 2;
-
         gbc.gridx = 0;
-        newStudentButton = createButton("New Student");
-        backgroundPanel.add(newStudentButton, gbc);
+        backgroundPanel.add(createPanel, gbc);
 
         gbc.gridx = 1;
-        issueBookButton = createButton("Issue Book");
-        backgroundPanel.add(issueBookButton, gbc);
+        backgroundPanel.add(transactionPanel, gbc);
 
-        // Third row of buttons
-        gbc.gridy = 3;
-
-        gbc.gridx = 0;
-        returnBookButton = createButton("Return Book");
-        backgroundPanel.add(returnBookButton, gbc);
-
-        gbc.gridx = 1;
-        aboutButton = createButton("About");
-        backgroundPanel.add(aboutButton, gbc);
+        gbc.gridx = 2;
+        backgroundPanel.add(viewPanel, gbc);
 
         setVisible(true);
     }
 
-    private JButton createButton(String text) {
+    private JButton createMainButton(String text) {
         JButton button = new JButton(text);
-        button.setPreferredSize(new Dimension(250, 60)); // Bigger button
-        button.setBackground(new Color(38, 117, 202));
+        button.setPreferredSize(new Dimension(250, 60));
+        button.setBackground(new Color(0, 102, 204));
         button.setForeground(Color.WHITE);
         button.setFont(new Font("Tahoma", Font.BOLD, 18));
         button.addActionListener(this);
         return button;
     }
 
+    private JPanel createSubPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(0, 1, 5, 5));
+        panel.setOpaque(false);
+        return panel;
+    }
+
+    private JButton createSubButton(String text) {
+        JButton button = new JButton(text);
+        button.setPreferredSize(new Dimension(200, 40));
+        button.setBackground(new Color(38, 117, 202));
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        button.addActionListener(this);
+        return button;
+    }
+
+    @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == newBookButton) {
+        Object source = e.getSource();
+
+        // Toggle visibility of sub-panels
+        if (source == createButton) {
+            createPanel.setVisible(!createPanel.isVisible());
+        } else if (source == transactionButton) {
+            transactionPanel.setVisible(!transactionPanel.isVisible());
+        } else if (source == viewButton) {
+            viewPanel.setVisible(!viewPanel.isVisible());
+        }
+
+        // Handle sub-buttons
+        if (source == newBookSubButton) {
             new NewBook();
-        } else if (e.getSource() == statisticsButton) {
-            new Statistics();
-        } else if (e.getSource() == newStudentButton) {
+            dispose();
+        } else if (source == newStudentSubButton) {
             new NewStudent();
-        } else if (e.getSource() == issueBookButton) {
+        } else if (source == issueBookSubButton) {
             new IssueBook();
-        } else if (e.getSource() == returnBookButton) {
+        } else if (source == returnBookSubButton) {
             new ReturnBook();
-        } else if (e.getSource() == aboutButton) {
-            new About();
+        } else if (source == statisticsSubButton) {
+            // Check if the Statistics window is already open
+            if (statisticsFrame == null || !statisticsFrame.isVisible()) {
+                statisticsFrame = new Statistics(); // Open the Statistics window
+            }
+        } else if (source == bookRecordsSubButton) {
+            // Check if the Book Records window is already open
+            if (bookRecordsFrame == null || !bookRecordsFrame.isVisible()) {
+                bookRecordsFrame = new BookRecords(); // Open the Book Records window
+            }
         }
     }
 
